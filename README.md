@@ -15,12 +15,12 @@ https://github.com/dobromyslov/argonio-stm32-cmsis
 
 Proposed layout for your project:
 
-lib\ +
-     |- argonio-stm32-cmsis
-     \- argonio-stm32f0xx-hal-driver
-src\ +
-     |- conf\ +
-     |        |- stm32f0xx_cmsis_conf.h
-     |        \- stm32f0xx_hal_conf.h
-     \- main.c
-Makefile
+    lib\ +
+         |- argonio-stm32-cmsis
+         \- argonio-stm32f0xx-hal-driver
+    src\ +
+         |- conf\ +
+         |        |- stm32f0xx_cmsis_conf.h
+         |        \- stm32f0xx_hal_conf.h
+         \- main.c
+    Makefile
