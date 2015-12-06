@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_tsc.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   This file contains all the functions prototypes for the TSC firmware 
   *          library.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -44,9 +44,9 @@
  extern "C" {
 #endif
 
-#if defined(STM32F051x8) || defined(STM32F071xB) || \
+#if defined(STM32F051x8) || defined(STM32F071xB) || defined(STM32F091xC) || \
     defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) ||                         \
-    defined(STM32F058xx) || defined(STM32F078xx)
+    defined(STM32F058xx) || defined(STM32F078xx) || defined(STM32F098xx)
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal_def.h"
@@ -61,6 +61,9 @@
 
 /* Exported types ------------------------------------------------------------*/
    
+/** @defgroup TSC_Exported_Types TSC Exported Types
+  * @{
+  */
 /** 
   * @brief TSC state structure definition  
   */ 
@@ -123,12 +126,19 @@ typedef struct
   HAL_LockTypeDef           Lock;      /*!< Lock feature */
 } TSC_HandleTypeDef;
 
+/**
+  * @}
+  */
+
 /* Exported constants --------------------------------------------------------*/
 
-/** @defgroup TSC_Exported_Constants
+/** @defgroup TSC_Exported_Constants TSC Exported Constants
   * @{
   */ 
 
+/** @defgroup TSC_CTPH_Cycles TSC Charge Transfer Pulse High
+  * @{
+  */ 
 #define TSC_CTPH_1CYCLE   ((uint32_t)((uint32_t) 0 << 28))
 #define TSC_CTPH_2CYCLES  ((uint32_t)((uint32_t) 1 << 28))
 #define TSC_CTPH_3CYCLES  ((uint32_t)((uint32_t) 2 << 28))
@@ -161,7 +171,13 @@ typedef struct
                           ((VAL) == TSC_CTPH_14CYCLES) || \
                           ((VAL) == TSC_CTPH_15CYCLES) || \
                           ((VAL) == TSC_CTPH_16CYCLES))
+/**
+  * @}
+  */
 
+/** @defgroup TSC_CTPL_Cycles TSC Charge Transfer Pulse Low
+  * @{
+  */  
 #define TSC_CTPL_1CYCLE   ((uint32_t)((uint32_t) 0 << 24))
 #define TSC_CTPL_2CYCLES  ((uint32_t)((uint32_t) 1 << 24))
 #define TSC_CTPL_3CYCLES  ((uint32_t)((uint32_t) 2 << 24))
@@ -194,15 +210,24 @@ typedef struct
                           ((VAL) == TSC_CTPL_14CYCLES) || \
                           ((VAL) == TSC_CTPL_15CYCLES) || \
                           ((VAL) == TSC_CTPL_16CYCLES))
-
-#define IS_TSC_SS(VAL) (((VAL) == DISABLE) || ((VAL) == ENABLE))
-
-#define IS_TSC_SSD(VAL) (((VAL) == 0) || (((VAL) > 0) && ((VAL) < 128)))
-
+/**
+  * @}
+  */
+  
+/** @defgroup TSC_SS_Prescaler_definition TSC Spread spectrum prescaler definition
+  * @{
+  */
 #define TSC_SS_PRESC_DIV1 ((uint32_t)0)  
 #define TSC_SS_PRESC_DIV2  (TSC_CR_SSPSC) 
 #define IS_TSC_SS_PRESC(VAL) (((VAL) == TSC_SS_PRESC_DIV1) || ((VAL) == TSC_SS_PRESC_DIV2))
 
+/**
+  * @}
+  */
+  
+/** @defgroup TSC_PG_Prescaler_definition TSC Pulse Generator prescaler definition
+  * @{
+  */
 #define TSC_PG_PRESC_DIV1   ((uint32_t)(0 << 12))
 #define TSC_PG_PRESC_DIV2   ((uint32_t)(1 << 12))
 #define TSC_PG_PRESC_DIV4   ((uint32_t)(2 << 12))
@@ -219,7 +244,13 @@ typedef struct
                               ((VAL) == TSC_PG_PRESC_DIV32) || \
                               ((VAL) == TSC_PG_PRESC_DIV64) || \
                               ((VAL) == TSC_PG_PRESC_DIV128))
+/**
+  * @}
+  */
 
+/** @defgroup TSC_MCV_definition TSC Max Count Value definition
+  * @{
+  */  
 #define TSC_MCV_255   ((uint32_t)(0 << 5))
 #define TSC_MCV_511   ((uint32_t)(1 << 5))
 #define TSC_MCV_1023  ((uint32_t)(2 << 5))
@@ -234,19 +265,43 @@ typedef struct
                          ((VAL) == TSC_MCV_4095) || \
                          ((VAL) == TSC_MCV_8191) || \
                          ((VAL) == TSC_MCV_16383))
+/**
+  * @}
+  */
 
+/** @defgroup TSC_IO_default_mode_definition TSC I/O default mode definition
+  * @{
+  */  
 #define TSC_IODEF_OUT_PP_LOW ((uint32_t)0)
 #define TSC_IODEF_IN_FLOAT   (TSC_CR_IODEF)
 #define IS_TSC_IODEF(VAL) (((VAL) == TSC_IODEF_OUT_PP_LOW) || ((VAL) == TSC_IODEF_IN_FLOAT))
+/**
+  * @}
+  */
 
-#define TSC_SYNC_POL_FALL      ((uint32_t)0)
-#define TSC_SYNC_POL_RISE_HIGH (TSC_CR_SYNCPOL)
-#define IS_TSC_SYNC_POL(VAL) (((VAL) == TSC_SYNC_POL_FALL) || ((VAL) == TSC_SYNC_POL_RISE_HIGH))
-
+/** @defgroup TSC_Synchronization_pin_polarity TSC Synchronization pin polarity
+  * @{
+  */    
+#define TSC_SYNC_POLARITY_FALLING      ((uint32_t)0)
+#define TSC_SYNC_POLARITY_RISING (TSC_CR_SYNCPOL)
+#define IS_TSC_SYNC_POL(VAL) (((VAL) == TSC_SYNC_POLARITY_FALLING) || ((VAL) == TSC_SYNC_POLARITY_RISING))
+/**
+  * @}
+  */
+  
+/** @defgroup TSC_Acquisition_mode TSC Acquisition mode
+  * @{
+  */   
 #define TSC_ACQ_MODE_NORMAL  ((uint32_t)0)
 #define TSC_ACQ_MODE_SYNCHRO (TSC_CR_AM)
 #define IS_TSC_ACQ_MODE(VAL) (((VAL) == TSC_ACQ_MODE_NORMAL) || ((VAL) == TSC_ACQ_MODE_SYNCHRO))
-
+/**
+  * @}
+  */
+  
+/** @defgroup TSC_IO_mode_definition TSC I/O mode definition
+  * @{
+  */
 #define TSC_IOMODE_UNUSED   ((uint32_t)0)
 #define TSC_IOMODE_CHANNEL  ((uint32_t)1)
 #define TSC_IOMODE_SHIELD   ((uint32_t)2)
@@ -255,8 +310,11 @@ typedef struct
                             ((VAL) == TSC_IOMODE_CHANNEL) || \
                             ((VAL) == TSC_IOMODE_SHIELD) || \
                             ((VAL) == TSC_IOMODE_SAMPLING))
+/**
+  * @}
+  */
 
-/** @defgroup TSC_interrupts_definition 
+/** @defgroup TSC_interrupts_definition TSC interrupts definition
   * @{
   */
 #define TSC_IT_EOA ((uint32_t)TSC_IER_EOAIE)  
@@ -266,7 +324,7 @@ typedef struct
   * @}
   */ 
 
-/** @defgroup TSC_flags_definition 
+/** @defgroup TSC_flags_definition TSC Flags Definition
   * @{
   */ 
 #define TSC_FLAG_EOA ((uint32_t)TSC_ISR_EOAF)
@@ -275,6 +333,9 @@ typedef struct
   * @}
   */
 
+/** @defgroup TSC_groups_definition TSC groups definition
+  * @{
+  */ 
 #define TSC_NB_OF_GROUPS (8)
 
 #define TSC_GROUP1 ((uint32_t)0x00000001)
@@ -346,12 +407,36 @@ typedef struct
 #define TSC_GROUP8_ALL_IOS ((uint32_t)0xF0000000)
 
 #define TSC_ALL_GROUPS_ALL_IOS ((uint32_t)0xFFFFFFFF)
-
+/**
+  * @}
+  */
+  
 /**
   * @}
   */ 
 
+/* Private macros -----------------------------------------------------------*/
+/** @defgroup TSC_Private_Macros TSC Private Macros
+ * @{
+ */
+/** @defgroup TSC_Spread_Spectrum  TSC Spread Spectrum
+  * @{
+  */  
+#define IS_TSC_SS(VAL) (((VAL) == DISABLE) || ((VAL) == ENABLE))
+
+#define IS_TSC_SSD(VAL) (((VAL) == 0) || (((VAL) > 0) && ((VAL) < 128)))
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */  
+
 /* Exported macros -----------------------------------------------------------*/
+/** @defgroup TSC_Exported_Macros TSC Exported Macros
+ * @{
+ */
 
 /** @brief  Reset TSC handle state
   * @param  __HANDLE__: TSC handle.
@@ -542,14 +627,31 @@ typedef struct
 #define __HAL_TSC_GET_GROUP_STATUS(__HANDLE__, __GX_INDEX__) \
 ((((__HANDLE__)->Instance->IOGCSR & (uint32_t)((uint32_t)1 << ((__GX_INDEX__) + (uint32_t)16))) == (uint32_t)((uint32_t)1 << ((__GX_INDEX__) + (uint32_t)16))) ? TSC_GROUP_COMPLETED : TSC_GROUP_ONGOING)
 
+/**
+  * @}
+  */
+  
 /* Exported functions --------------------------------------------------------*/  
+/** @addtogroup TSC_Exported_Functions TSC Exported Functions
+  * @{
+  */
 
+/** @addtogroup TSC_Exported_Functions_Group1 Initialization/de-initialization functions 
+ *  @brief    Initialization and Configuration functions 
+ *  @{
+ */
 /* Initialization and de-initialization functions *****************************/
 HAL_StatusTypeDef HAL_TSC_Init(TSC_HandleTypeDef* htsc);
 HAL_StatusTypeDef HAL_TSC_DeInit(TSC_HandleTypeDef *htsc);
 void HAL_TSC_MspInit(TSC_HandleTypeDef* htsc);
 void HAL_TSC_MspDeInit(TSC_HandleTypeDef* htsc);
+/**
+  * @}
+  */
 
+/** @addtogroup TSC_Exported_Functions_Group2 IO operation functions
+ *  @brief    IO operation functions  *  @{
+ */
 /* IO operation functions *****************************************************/
 HAL_StatusTypeDef HAL_TSC_Start(TSC_HandleTypeDef* htsc);
 HAL_StatusTypeDef HAL_TSC_Start_IT(TSC_HandleTypeDef* htsc);
@@ -557,23 +659,47 @@ HAL_StatusTypeDef HAL_TSC_Stop(TSC_HandleTypeDef* htsc);
 HAL_StatusTypeDef HAL_TSC_Stop_IT(TSC_HandleTypeDef* htsc);
 TSC_GroupStatusTypeDef HAL_TSC_GroupGetStatus(TSC_HandleTypeDef* htsc, uint32_t gx_index);
 uint32_t HAL_TSC_GroupGetValue(TSC_HandleTypeDef* htsc, uint32_t gx_index);
+/**
+  * @}
+  */
 
+/** @addtogroup TSC_Exported_Functions_Group3 Peripheral Control functions
+ *  @brief    Peripheral Control functions 
+ *  @{
+ */
 /* Peripheral Control functions ***********************************************/
 HAL_StatusTypeDef HAL_TSC_IOConfig(TSC_HandleTypeDef* htsc, TSC_IOConfigTypeDef* config);
 HAL_StatusTypeDef HAL_TSC_IODischarge(TSC_HandleTypeDef* htsc, uint32_t choice);
+/**
+  * @}
+  */
 
+/** @addtogroup TSC_Exported_Functions_Group4 State functions
+ *  @brief   State functions 
+ *  @{
+ */
 /* Peripheral State and Error functions ***************************************/
 HAL_TSC_StateTypeDef HAL_TSC_GetState(TSC_HandleTypeDef* htsc);
 HAL_StatusTypeDef HAL_TSC_PollForAcquisition(TSC_HandleTypeDef* htsc);
 void HAL_TSC_IRQHandler(TSC_HandleTypeDef* htsc);
-
+/**
+  * @}
+  */
+  
+/** @addtogroup TSC_Exported_Functions_Group5 Callback functions
+ *  @brief   Callback functions 
+ *  @{
+ */
 /* Callback functions *********************************************************/
 void HAL_TSC_ConvCpltCallback(TSC_HandleTypeDef* htsc);
 void HAL_TSC_ErrorCallback(TSC_HandleTypeDef* htsc);
+/**
+  * @}
+  */
 
-#endif /* defined(STM32F051x8) || defined(STM32F071xB) || */
-       /* defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) ||                         */
-       /* defined(STM32F058xx) || defined(STM32F078xx)                            */
+/**
+  * @}
+  */ 
 
 /**
   * @}
@@ -583,6 +709,11 @@ void HAL_TSC_ErrorCallback(TSC_HandleTypeDef* htsc);
   * @}
   */
 
+#endif /* defined(STM32F051x8) || defined(STM32F071xB) || defined(STM32F091xC) || */
+       /* defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) || */
+       /* defined(STM32F058xx) || defined(STM32F078xx) || defined(STM32F098xx)    */
+
+
 #ifdef __cplusplus
 }
 #endif
@@ -590,3 +721,4 @@ void HAL_TSC_ErrorCallback(TSC_HandleTypeDef* htsc);
 #endif /*__STM32F0xx_TSC_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

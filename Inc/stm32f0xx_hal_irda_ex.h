@@ -2,13 +2,13 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_irda_ex.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   Header file of IRDA HAL Extension module.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -32,7 +32,7 @@
   * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
-  ******************************************************************************  
+  ******************************************************************************
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
@@ -43,7 +43,7 @@
  extern "C" {
 #endif
 
-#if !defined(STM32F030x6) && !defined(STM32F030x8) 
+#if !defined(STM32F030x6) && !defined(STM32F030x8) && !defined(STM32F070x6) && !defined(STM32F070xB) && !defined(STM32F030xC) 
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal_def.h"
@@ -52,13 +52,13 @@
   * @{
   */
 
-/** @addtogroup IRDAEx
+/** @addtogroup IRDAEx IRDAEx
   * @{
-  */ 
+  */
 
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-/** @defgroup IRDAEx_Exported_Constants
+/** @defgroup IRDAEx_Exported_Constants IRDAEx Exported Constants
   * @{
   */
   
@@ -66,44 +66,42 @@
   * @{
   */
 #if defined (STM32F042x6) || defined (STM32F048xx) || \
-    defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx)
-#define IRDA_WORDLENGTH_7B                  ((uint32_t)USART_CR1_M1)
-#define IRDA_WORDLENGTH_8B                  ((uint32_t)0x00000000)
-#define IRDA_WORDLENGTH_9B                  ((uint32_t)USART_CR1_M0)
-#define IS_IRDA_WORD_LENGTH(LENGTH) (((LENGTH) == IRDA_WORDLENGTH_7B) || \
-                                     ((LENGTH) == IRDA_WORDLENGTH_8B) || \
-                                     ((LENGTH) == IRDA_WORDLENGTH_9B))
+    defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || \
+    defined (STM32F091xC) || defined (STM32F098xx)
+#define IRDA_WORDLENGTH_7B                  ((uint32_t)USART_CR1_M1)   /*!< 7-bit long frame */
+#define IRDA_WORDLENGTH_8B                  ((uint32_t)0x00000000)     /*!< 8-bit long frame */
+#define IRDA_WORDLENGTH_9B                  ((uint32_t)USART_CR1_M0)   /*!< 9-bit long frame */
 #else
-#define IRDA_WORDLENGTH_8B                  ((uint32_t)0x00000000)
-#define IRDA_WORDLENGTH_9B                  ((uint32_t)USART_CR1_M)
-#define IS_IRDA_WORD_LENGTH(LENGTH) (((LENGTH) == IRDA_WORDLENGTH_8B) || \
-                                     ((LENGTH) == IRDA_WORDLENGTH_9B))
+#define IRDA_WORDLENGTH_8B                  ((uint32_t)0x00000000)     /*!< 8-bit long frame */
+#define IRDA_WORDLENGTH_9B                  ((uint32_t)USART_CR1_M)    /*!< 9-bit long frame */
 #endif /* defined (STM32F042x6) || defined (STM32F048xx) || \
-          defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) */
+          defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || \
+          defined (STM32F091xC) || defined (STM32F098xx)*/
 /**
   * @}
   */
-  
-  
+    
 /**
   * @}
   */  
   
 /* Exported macros -----------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 
-/** @defgroup IRDAEx_Exported_Macros
+/* Private macros ------------------------------------------------------------*/
+
+/** @defgroup IRDAEx_Private_Macros IRDAEx Private Macros
   * @{
   */
-  
-/** @brief  Reports the IRDA clock source.
-  * @param  __HANDLE__: specifies the IRDA Handle
-  * @param  __CLOCKSOURCE__ : output variable   
+
+/** @brief  Report the IRDA clock source.
+  * @param  __HANDLE__: specifies the IRDA Handle.
+  * @param  __CLOCKSOURCE__: output variable.
   * @retval IRDA clocking source, written in __CLOCKSOURCE__.
   */
 
-
-#if defined(STM32F030x6) || defined(STM32F031x6) || defined(STM32F038xx)
-#define __HAL_IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
+#if defined(STM32F031x6) || defined(STM32F038xx)
+#define IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
   do {                                                        \
      switch(__HAL_RCC_GET_USART1_SOURCE())                    \
      {                                                        \
@@ -124,10 +122,9 @@
         break;                                                \
      }                                                        \
   } while(0) 
-#elif defined (STM32F030x8) ||                                \
-      defined (STM32F042x6) || defined (STM32F048xx) ||       \
+#elif defined (STM32F042x6) || defined (STM32F048xx) ||       \
       defined (STM32F051x8) || defined (STM32F058xx)
-#define __HAL_IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
+#define IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
   do {                                                        \
     if((__HANDLE__)->Instance == USART1)                      \
     {                                                         \
@@ -160,7 +157,7 @@
     }                                                         \
   } while(0) 
 #elif defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx)
-#define __HAL_IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
+#define IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
   do {                                                        \
     if((__HANDLE__)->Instance == USART1)                      \
     {                                                         \
@@ -217,8 +214,8 @@
       (__CLOCKSOURCE__) = IRDA_CLOCKSOURCE_UNDEFINED;         \
     }                                                         \
   } while(0)   
-#elif defined(STM32F091xC)
-#define __HAL_IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
+#elif defined(STM32F091xC) || defined(STM32F098xx)
+#define IRDA_GETCLOCKSOURCE(__HANDLE__,__CLOCKSOURCE__) \
   do {                                                        \
     if((__HANDLE__)->Instance == USART1)                      \
     {                                                         \
@@ -308,18 +305,23 @@
       (__CLOCKSOURCE__) = IRDA_CLOCKSOURCE_UNDEFINED;         \
     }                                                         \
   } while(0)
-  
-#endif /* defined(STM32F030x6) || defined(STM32F031x6) || defined(STM32F038xx) */
-  
-  
-/** @brief  Computes the mask to apply to retrieve the received data
+
+#endif /* defined(STM32F031x6) || defined(STM32F038xx) */
+
+
+/** @brief  Compute the mask to apply to retrieve the received data
   *         according to the word length and to the parity bits activation.
+  * @note   If PCE = 1, the parity bit is not included in the data extracted
+  *         by the reception API().
+  *         This masking operation is not carried out in the case of
+  *         DMA transfers.
   * @param  __HANDLE__: specifies the IRDA Handle
-  * @retval none
+  * @retval None, the mask to apply to IRDA RDR register is stored in (__HANDLE__)->Mask field.
   */  
 #if defined (STM32F042x6) || defined (STM32F048xx) || \
-    defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx)
-#define __HAL_IRDA_MASK_COMPUTATION(__HANDLE__)                       \
+    defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || \
+    defined (STM32F091xC) || defined (STM32F098xx)
+#define IRDA_MASK_COMPUTATION(__HANDLE__)                       \
   do {                                                                \
   if ((__HANDLE__)->Init.WordLength == IRDA_WORDLENGTH_9B)            \
   {                                                                   \
@@ -356,7 +358,7 @@
   }                                                                   \
 } while(0) 
 #else
-#define __HAL_IRDA_MASK_COMPUTATION(__HANDLE__)                       \
+#define IRDA_MASK_COMPUTATION(__HANDLE__)                       \
   do {                                                                \
   if ((__HANDLE__)->Init.WordLength == IRDA_WORDLENGTH_9B)            \
   {                                                                   \
@@ -382,27 +384,42 @@
   }                                                                   \
 } while(0) 
 #endif /* defined (STM32F042x6) || defined (STM32F048xx) || \
-          defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) */
+          defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || \
+          defined (STM32F091xC) || defined(STM32F098xx) */
+
+/**
+  * @brief Ensure that IRDA frame length is valid.
+  * @param __LENGTH__: IRDA frame length. 
+  * @retval SET (__LENGTH__ is valid) or RESET (__LENGTH__ is invalid)
+  */ 
+#if defined (STM32F042x6) || defined (STM32F048xx) || \
+    defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || \
+    defined (STM32F091xC) || defined (STM32F098xx)
+#define IS_IRDA_WORD_LENGTH(__LENGTH__) (((__LENGTH__) == IRDA_WORDLENGTH_7B) || \
+                                         ((__LENGTH__) == IRDA_WORDLENGTH_8B) || \
+                                         ((__LENGTH__) == IRDA_WORDLENGTH_9B))
+#else
+#define IS_IRDA_WORD_LENGTH(__LENGTH__) (((__LENGTH__) == IRDA_WORDLENGTH_8B) || \
+                                         ((__LENGTH__) == IRDA_WORDLENGTH_9B))
+#endif /* defined (STM32F042x6) || defined (STM32F048xx) || \
+          defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || \
+          defined (STM32F091xC) || defined (STM32F098xx)*/
+
 /**
   * @}
   */
-  
+
 /* Exported functions --------------------------------------------------------*/
-/* Initialization and de-initialization functions  ****************************/
-/* IO operation functions *****************************************************/
-/* Peripheral Control functions ***********************************************/
-/* Peripheral State and Error functions ***************************************/
-
 
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}
-  */ 
+  */
 
-#endif /* !defined(STM32F030x6) && !defined(STM32F030x8) */
+#endif /* !defined(STM32F030x6) && !defined(STM32F030x8) && !defined(STM32F070x6) && !defined(STM32F070xB) && !defined(STM32F030xC)  */
   
 #ifdef __cplusplus
 }
@@ -411,3 +428,4 @@
 #endif /* __STM32F0xx_HAL_IRDA_EX_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

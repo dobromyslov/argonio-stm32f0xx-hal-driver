@@ -2,28 +2,26 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_can.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   CAN HAL module driver.
-  *
   *          This file provides firmware functions to manage the following 
-  *          functionalities of the Controller Area Network (CAN) peripheral:           
+  *          functionalities of the Controller Area Network (CAN) peripheral:
   *           + Initialization and de-initialization functions 
   *           + IO operation functions
   *           + Peripheral Control functions
-  *           + Peripheral State and Error functions       
+  *           + Peripheral State and Error functions
   *
   @verbatim
   ==============================================================================    
                         ##### How to use this driver #####
   ==============================================================================
     [..]            
-      (#) Enable the CAN controller interface clock using 
-          __CAN_CLK_ENABLE(); 
+      (#) Enable the CAN controller interface clock using __HAL_RCC_CAN1_CLK_ENABLE(); 
        
       (#) CAN pins configuration
         (++) Enable the clock for the CAN GPIOs using the following function:
-             __GPIOx_CLK_ENABLE();   
+             __HAL_RCC_GPIOx_CLK_ENABLE();   
         (++) Connect and configure the involved CAN pins to AF9 using the 
               following function HAL_GPIO_Init(); 
               
@@ -73,7 +71,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -103,34 +101,47 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
+#ifdef HAL_CAN_MODULE_ENABLED  
+  
+#if defined(STM32F072xB) || defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F091xC) || defined(STM32F098xx) 
+
 /** @addtogroup STM32F0xx_HAL_Driver
   * @{
   */
 
-/** @defgroup CAN 
+/** @defgroup CAN CAN
   * @brief CAN driver modules
   * @{
   */ 
   
-#ifdef HAL_CAN_MODULE_ENABLED  
-  
-#if defined(STM32F072xB) || defined(STM32F042x6) || defined(STM32F048xx) 
-  
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define HAL_CAN_DEFAULT_TIMEOUT 10
+/** @defgroup CAN_Private_Constants CAN Private Constants
+  * @{
+  */
+#define CAN_TIMEOUT_VALUE 10
+/**
+  * @}
+  */
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+/** @defgroup CAN_Private_Functions CAN Private Functions
+  * @{
+  */
 static HAL_StatusTypeDef CAN_Receive_IT(CAN_HandleTypeDef* hcan, uint8_t FIFONumber);
 static HAL_StatusTypeDef CAN_Transmit_IT(CAN_HandleTypeDef* hcan);
-/* Private functions ---------------------------------------------------------*/
+/**
+  * @}
+  */
+  
+/* Exported functions ---------------------------------------------------------*/
 
-/** @defgroup CAN_Private_Functions
+/** @defgroup CAN_Exported_Functions CAN Exported Functions
   * @{
   */
 
-/** @defgroup CAN_Group1 Initialization and de-initialization functions 
+/** @defgroup CAN_Exported_Functions_Group1 Initialization and de-initialization functions 
  *  @brief    Initialization and Configuration functions 
  *
 @verbatim    
@@ -179,6 +190,8 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef* hcan)
   
   if(hcan->State == HAL_CAN_STATE_RESET)
   {
+    /* Allocate lock resource and initialize it */
+    hcan->Lock = HAL_UNLOCKED;
     /* Init the low level hardware */
     HAL_CAN_MspInit(hcan);
   }
@@ -192,15 +205,17 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef* hcan)
   /* Request initialisation */
   hcan->Instance->MCR |= CAN_MCR_INRQ ;
 
-  /* Get tickstart */
+  /* Get tick */
   tickstart = HAL_GetTick();   
   
   /* Wait the acknowledge */
   while((hcan->Instance->MSR & CAN_MSR_INAK) != CAN_MSR_INAK)
   {
-    if((HAL_GetTick() - tickstart) > HAL_CAN_DEFAULT_TIMEOUT)
+    if((HAL_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
     {
       hcan->State= HAL_CAN_STATE_TIMEOUT;
+      /* Process unlocked */
+      __HAL_UNLOCK(hcan);
       return HAL_TIMEOUT;
     }
   }
@@ -278,15 +293,17 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef* hcan)
     /* Request leave initialisation */
     hcan->Instance->MCR &= ~(uint32_t)CAN_MCR_INRQ;
 
-    /* Get timeout */
+    /* Get tick */
     tickstart = HAL_GetTick();   
    
     /* Wait the acknowledge */
     while((hcan->Instance->MSR & CAN_MSR_INAK) == CAN_MSR_INAK)
     {
-      if((HAL_GetTick() - tickstart) > HAL_CAN_DEFAULT_TIMEOUT)
+      if((HAL_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
       {
        hcan->State= HAL_CAN_STATE_TIMEOUT;
+       /* Process unlocked */
+       __HAL_UNLOCK(hcan);
         return HAL_TIMEOUT;
       }
     }
@@ -344,6 +361,10 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef* hcan, CAN_FilterConfTy
 
   /* Initialisation mode for the filter */
   hcan->Instance->FMR |= (uint32_t)CAN_FMR_FINIT;
+
+  /* Select the start slave bank */
+  hcan->Instance->FMR &= ~((uint32_t)CAN_FMR_CAN2SB);
+  hcan->Instance->FMR |= (uint32_t)(sFilterConfig->BankNumber << 8);
   
   /* Filter Deactivation */
   hcan->Instance->FA1R &= ~(uint32_t)filternbrbitpos;
@@ -482,8 +503,8 @@ __weak void HAL_CAN_MspDeInit(CAN_HandleTypeDef* hcan)
   * @}
   */
 
-/** @defgroup CAN_Group2 I/O operation functions
- *  @brief    I/O operation functions 
+/** @defgroup CAN_Exported_Functions_Group2 Input and Output operation functions
+ *  @brief    IO operation functions 
  *
 @verbatim   
   ==============================================================================
@@ -579,7 +600,7 @@ HAL_StatusTypeDef HAL_CAN_Transmit(CAN_HandleTypeDef* hcan, uint32_t Timeout)
     /* Request transmission */
     hcan->Instance->sTxMailBox[transmitmailbox].TIR |= CAN_TI0R_TXRQ;
   
-    /* Get timeout */
+    /* Get tick */
     tickstart = HAL_GetTick();   
   
     /* Check End of transmission flag */
@@ -771,7 +792,7 @@ HAL_StatusTypeDef HAL_CAN_Receive(CAN_HandleTypeDef* hcan, uint8_t FIFONumber, u
     hcan->State = HAL_CAN_STATE_BUSY_RX;
   }
     
-  /* Get timeout */
+  /* Get tick */
   tickstart = HAL_GetTick();   
   
   /* Check pending message */
@@ -946,13 +967,13 @@ HAL_StatusTypeDef HAL_CAN_Sleep(CAN_HandleTypeDef* hcan)
     return HAL_ERROR;
   }
   
-  /* Get timeout */
+  /* Get tick */
   tickstart = HAL_GetTick();   
   
   /* Wait the acknowledge */
   while((hcan->Instance->MSR & (CAN_MSR_SLAK|CAN_MSR_INAK)) != CAN_MSR_SLAK)
   {
-    if((HAL_GetTick() - tickstart) > HAL_CAN_DEFAULT_TIMEOUT)
+    if((HAL_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
     {
       hcan->State = HAL_CAN_STATE_TIMEOUT;
       /* Process unlocked */
@@ -991,13 +1012,13 @@ HAL_StatusTypeDef HAL_CAN_WakeUp(CAN_HandleTypeDef* hcan)
   /* Wake up request */
   hcan->Instance->MCR &= ~(uint32_t)CAN_MCR_SLEEP;
     
-  /* Get timeout */
+  /* Get tick */
   tickstart = HAL_GetTick();   
   
   /* Sleep mode status */
   while((hcan->Instance->MSR & CAN_MSR_SLAK) == CAN_MSR_SLAK)
   {
-    if((HAL_GetTick() - tickstart) > HAL_CAN_DEFAULT_TIMEOUT)
+    if((HAL_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
     {
       hcan->State= HAL_CAN_STATE_TIMEOUT;
       /* Process unlocked */
@@ -1182,7 +1203,7 @@ __weak void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
   * @}
   */
 
-/** @defgroup CAN_Group3 Peripheral State and Error functions
+/** @defgroup CAN_Exported_Functions_Group3 Peripheral State and Error functions
  *  @brief   CAN Peripheral State functions 
  *
 @verbatim   
@@ -1225,6 +1246,15 @@ uint32_t HAL_CAN_GetError(CAN_HandleTypeDef *hcan)
   * @}
   */
 
+/**
+  * @}
+  */
+  
+/** @addtogroup CAN_Private_Functions CAN Private Functions
+ *  @brief    CAN Frame message Rx/Tx functions 
+ *
+ * @{
+ */
 /**
   * @brief  Initiates and transmits a CAN frame message.
   * @param  hcan: pointer to a CAN_HandleTypeDef structure that contains
@@ -1359,19 +1389,20 @@ static HAL_StatusTypeDef CAN_Receive_IT(CAN_HandleTypeDef* hcan, uint8_t FIFONum
   /* Return function status */
   return HAL_OK;
 }
+/**
+  * @}
+  */
 
 /**
   * @}
   */
-#endif /* defined(STM32F072xB) || defined(STM32F042x6) || defined(STM32F048xx)  */
+
+/**
+  * @}
+  */
+ 
+#endif /* defined(STM32F072xB) || defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F091xC) || defined(STM32F098xx) */
 
 #endif /* HAL_CAN_MODULE_ENABLED */
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

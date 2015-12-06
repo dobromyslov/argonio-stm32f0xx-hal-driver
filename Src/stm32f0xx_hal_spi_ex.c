@@ -1,22 +1,14 @@
 /**
   ******************************************************************************
-  * @file    stm32f0xx_hal_msp_template.c
+  * @file    stm32f0xx_hal_spi_ex.c
   * @author  MCD Application Team
   * @version V1.3.0
   * @date    26-June-2015
-  * @brief   HAL MSP module.
-  *          This file template is located in the HAL folder and should be copied 
-  *          to the user folder.
-  *         
-  @verbatim
- ===============================================================================
-                     ##### How to use this driver #####
- ===============================================================================
-    [..]
-    This file is generated automatically by MicroXplorer and eventually modified 
-    by the user
-
-  @endverbatim
+  * @brief   Extended SPI HAL module driver.
+  *          This file provides firmware functions to manage the following
+  *          SPI peripheral extended functionalities :
+  *           + IO operation functions
+  *
   ******************************************************************************
   * @attention
   *
@@ -45,7 +37,7 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */ 
+  */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
@@ -54,69 +46,81 @@
   * @{
   */
 
-/** @defgroup HAL_MSP HAL MSP module driver
-  * @brief HAL MSP module.
+/** @defgroup SPIEx SPIEx
+  * @brief SPI Extended HAL module driver
   * @{
   */
+#ifdef HAL_SPI_MODULE_ENABLED
 
 /* Private typedef -----------------------------------------------------------*/
-/* Private define ------------------------------------------------------------*/
-/* Private macro -------------------------------------------------------------*/
+/* Private defines -----------------------------------------------------------*/
+/** @defgroup SPIEx_Private_Constants SPIEx Private Constants
+  * @{
+  */
+#define SPI_FIFO_SIZE       4
+/**
+  * @}
+  */
+
+/* Private macros ------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
+/* Exported functions ---------------------------------------------------------*/
 
-/** @defgroup HAL_MSP_Private_Functions HAL MSP Private Functions
+/** @defgroup SPIEx_Exported_Functions SPIEx Exported Functions
+  * @{
+  */
+
+/** @defgroup SPIEx_Exported_Functions_Group1 IO operation functions
+ *  @brief   Data transfers functions
+ *
+@verbatim
+  ==============================================================================
+                      ##### IO operation functions #####
+ ===============================================================================
+ [..]
+    This subsection provides a set of extended functions to manage the SPI
+    data transfers.
+
+    (#) Rx data flush function:
+        (++) HAL_SPIEx_FlushRxFifo()
+
+@endverbatim
   * @{
   */
 
 /**
-  * @brief  Initializes the Global MSP.
-  * @retval None
+  * @brief Flush the RX fifo.
+  * @param  hspi: pointer to a SPI_HandleTypeDef structure that contains
+  *               the configuration information for the specified SPI module.
+  * @retval HAL status
   */
-void HAL_MspInit(void)
+HAL_StatusTypeDef HAL_SPIEx_FlushRxFifo(SPI_HandleTypeDef *hspi)
 {
-  /* NOTE : This function is generated automatically by MicroXplorer and eventually  
-            modified by the user
-   */ 
-}
-
-/**
-  * @brief  DeInitializes the Global MSP. 
-  * @retval None
-  */
-void HAL_MspDeInit(void)
-{
-  /* NOTE : This function is generated automatically by MicroXplorer and eventually  
-            modified by the user
-   */
-}
-
-/**
-  * @brief  Initializes the PPP MSP.
-  * @retval None
-  */
-void HAL_PPP_MspInit(void)
-{
-  /* NOTE : This function is generated automatically by MicroXplorer and eventually  
-            modified by the user
-   */ 
-}
-
-/**
-  * @brief  DeInitializes the PPP MSP. 
-  * @retval None
-  */
-void HAL_PPP_MspDeInit(void)
-{
-  /* NOTE : This function is generated automatically by MicroXplorer and eventually  
-            modified by the user
-   */
+  __IO uint32_t tmpreg;
+  uint8_t  count = 0;
+  while((hspi->Instance->SR & SPI_FLAG_FRLVL) !=  SPI_FRLVL_EMPTY)
+  {
+    count++;
+    tmpreg = hspi->Instance->DR;
+    UNUSED(tmpreg); /* To avoid GCC warning */
+    if(count == SPI_FIFO_SIZE)
+    {
+      return HAL_TIMEOUT;
+    }
+  }
+  return HAL_OK;
 }
 
 /**
   * @}
   */
+
+/**
+  * @}
+  */
+
+#endif /* HAL_SPI_MODULE_ENABLED */
 
 /**
   * @}

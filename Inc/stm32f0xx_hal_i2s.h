@@ -2,13 +2,13 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_i2s.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   Header file of I2S HAL module.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -43,10 +43,11 @@
  extern "C" {
 #endif
 
-#if defined(STM32F031x6) || defined(STM32F038xx) || 												\
-    defined(STM32F051x8) || defined(STM32F058xx) || 												\
+#if defined(STM32F031x6) || defined(STM32F038xx) || \
+    defined(STM32F051x8) || defined(STM32F058xx) || \
     defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || \
-    defined(STM32F042x6) || defined(STM32F048xx)
+    defined(STM32F042x6) || defined(STM32F048xx) || \
+    defined(STM32F091xC) || defined(STM32F098xx)
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal_def.h"
@@ -60,6 +61,10 @@
   */ 
 
 /* Exported types ------------------------------------------------------------*/ 
+/** @defgroup I2S_Exported_Types I2S Exported Types
+  * @{
+  */
+
 /** 
   * @brief I2S Init structure definition  
   */
@@ -82,10 +87,6 @@ typedef struct
 
   uint32_t CPOL;                /*!< Specifies the idle state of the I2S clock.
                                      This parameter can be a value of @ref I2S_Clock_Polarity */
-   
-  uint32_t ClockSource;         /*!< Specifies the I2S Clock Source.
-                                     This parameter can be a value of @ref I2S_Clock_Source */
-
 }I2S_InitTypeDef;
 
 /** 
@@ -103,75 +104,65 @@ typedef enum
 }HAL_I2S_StateTypeDef;
 
 /** 
-  * @brief  HAL I2S Error Code structure definition  
-  */ 
-typedef enum
-{
-  HAL_I2S_ERROR_NONE      = 0x00,  /*!< No error           */
-  HAL_I2S_ERROR_TIMEOUT   = 0x01,  /*!< Timeout error      */  
-  HAL_I2S_ERROR_OVR       = 0x02,  /*!< OVR error          */
-  HAL_I2S_ERROR_UDR       = 0x04,  /*!< UDR error          */
-  HAL_I2S_ERROR_DMA       = 0x08,  /*!< DMA transfer error */
-  HAL_I2S_ERROR_UNKNOW    = 0x10   /*!< Unknow Error error */  
-}HAL_I2S_ErrorTypeDef;
-
-/** 
   * @brief I2S handle Structure definition  
   */
 typedef struct
 {
-  SPI_TypeDef                *Instance;    /* I2S registers base address */
+  SPI_TypeDef                *Instance;    /*!< I2S registers base address */
 
-  I2S_InitTypeDef            Init;         /* I2S communication parameters */
+  I2S_InitTypeDef            Init;         /*!< I2S communication parameters */
   
-  uint16_t                   *pTxBuffPtr;  /* Pointer to I2S Tx transfer buffer */
+  uint16_t                   *pTxBuffPtr;  /*!< Pointer to I2S Tx transfer buffer */
   
-  __IO uint16_t              TxXferSize;   /* I2S Tx transfer size */
+  __IO uint16_t              TxXferSize;   /*!< I2S Tx transfer size */
   
-  __IO uint16_t              TxXferCount;  /* I2S Tx transfer Counter */
+  __IO uint16_t              TxXferCount;  /*!< I2S Tx transfer Counter */
   
-  uint16_t                   *pRxBuffPtr;  /* Pointer to I2S Rx transfer buffer */
+  uint16_t                   *pRxBuffPtr;  /*!< Pointer to I2S Rx transfer buffer */
   
-  __IO uint16_t              RxXferSize;   /* I2S Rx transfer size */
+  __IO uint16_t              RxXferSize;   /*!< I2S Rx transfer size */
   
-  __IO uint16_t              RxXferCount;  /* I2S Rx transfer counter 
+  __IO uint16_t              RxXferCount;  /*!< I2S Rx transfer counter 
                                               (This field is initialized at the 
                                                same value as transfer size at the 
                                                beginning of the transfer and 
                                                decremented when a sample is received. 
                                                NbSamplesReceived = RxBufferSize-RxBufferCount) */
 
-  DMA_HandleTypeDef          *hdmatx;      /* I2S Tx DMA handle parameters */
+  DMA_HandleTypeDef          *hdmatx;      /*!< I2S Tx DMA handle parameters */
 
-  DMA_HandleTypeDef          *hdmarx;      /* I2S Rx DMA handle parameters */
+  DMA_HandleTypeDef          *hdmarx;      /*!< I2S Rx DMA handle parameters */
   
-  __IO HAL_LockTypeDef       Lock;         /* I2S locking object */
+  __IO HAL_LockTypeDef       Lock;         /*!< I2S locking object */
   
-  __IO HAL_I2S_StateTypeDef  State;        /* I2S communication state */
+  __IO HAL_I2S_StateTypeDef  State;        /*!< I2S communication state */
 
-  __IO HAL_I2S_ErrorTypeDef  ErrorCode;    /* I2S Error code                 */
+  __IO uint32_t              ErrorCode;    /*!< I2S Error code          
+                                                This parameter can be a value of @ref I2S_Error */
 
 }I2S_HandleTypeDef;
-
-/* Exported constants --------------------------------------------------------*/
-
-/** @defgroup I2S_Exported_Constants
-  * @{
-  */
-
-/** @defgroup I2S_Clock_Source 
-  * @{
-  */
-#define I2S_CLOCK_EXTERNAL                ((uint32_t)0x00000001)
-#define I2S_CLOCK_SYSCLK                  ((uint32_t)0x00000002)
-
-#define IS_I2S_CLOCKSOURCE(CLOCK) (((CLOCK) == I2S_CLOCK_EXTERNAL) || \
-                                   ((CLOCK) == I2S_CLOCK_SYSCLK))
 /**
   * @}
   */
 
-/** @defgroup I2S_Mode 
+/* Exported constants --------------------------------------------------------*/
+/** @defgroup I2S_Exported_Constants I2S Exported Constants
+  * @{
+  */
+/** @defgroup I2S_Error I2S Error
+  * @{
+  */
+#define HAL_I2S_ERROR_NONE      ((uint32_t)0x00000000)  /*!< No error           */
+#define HAL_I2S_ERROR_TIMEOUT   ((uint32_t)0x00000001)  /*!< Timeout error      */  
+#define HAL_I2S_ERROR_OVR       ((uint32_t)0x00000002)  /*!< OVR error          */
+#define HAL_I2S_ERROR_UDR       ((uint32_t)0x00000004)  /*!< UDR error          */
+#define HAL_I2S_ERROR_DMA       ((uint32_t)0x00000008)  /*!< DMA transfer error */
+#define HAL_I2S_ERROR_UNKNOW    ((uint32_t)0x00000010)  /*!< Unknow Error error */  
+/**
+  * @}
+  */
+
+/** @defgroup I2S_Mode I2S Mode
   * @{
   */
 #define I2S_MODE_SLAVE_TX                ((uint32_t)0x00000000)
@@ -187,7 +178,7 @@ typedef struct
   * @}
   */
   
-/** @defgroup I2S_Standard 
+/** @defgroup I2S_Standard I2S Standard
   * @{
   */
 #define I2S_STANDARD_PHILIPS             ((uint32_t)0x00000000)
@@ -205,7 +196,7 @@ typedef struct
   * @}
   */
   
-/** @defgroup I2S_Data_Format 
+/** @defgroup I2S_Data_Format I2S Data Format
   * @{
   */
 #define I2S_DATAFORMAT_16B               ((uint32_t)0x00000000)
@@ -221,7 +212,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup I2S_MCLK_Output 
+/** @defgroup I2S_MCLK_Output I2S MCLK Output
   * @{
   */
 #define I2S_MCLKOUTPUT_ENABLE           ((uint32_t)SPI_I2SPR_MCKOE)
@@ -233,7 +224,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup I2S_Audio_Frequency 
+/** @defgroup I2S_Audio_Frequency I2S Audio Frequency
   * @{
   */
 #define I2S_AUDIOFREQ_192K               ((uint32_t)192000)
@@ -254,7 +245,7 @@ typedef struct
   * @}
   */
             
-/** @defgroup I2S_Clock_Polarity 
+/** @defgroup I2S_Clock_Polarity I2S Clock Polarity
   * @{
   */
 #define I2S_CPOL_LOW                    ((uint32_t)0x00000000)
@@ -266,7 +257,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup I2S_Interrupt_configuration_definition
+/** @defgroup I2S_Interrupt_configuration_definition I2S Interrupt configuration definition
   * @{
   */
 #define I2S_IT_TXE                      SPI_CR2_TXEIE
@@ -276,7 +267,7 @@ typedef struct
   * @}
   */
 
-/** @defgroup I2S_Flag_definition 
+/** @defgroup I2S_Flag_definition I2S Flag definition
   * @{
   */ 
 #define I2S_FLAG_TXE                    SPI_SR_TXE
@@ -297,6 +288,9 @@ typedef struct
   */ 
   
 /* Exported macros -----------------------------------------------------------*/
+/** @defgroup I2S_Exported_macros I2S Exported Macros
+  * @{
+  */
 
 /** @brief  Reset I2S handle state
   * @param  __HANDLE__: I2S handle.
@@ -354,22 +348,45 @@ typedef struct
   * @param  __HANDLE__: specifies the I2S Handle.
   * @retval None
   */                                                                                                   
-#define __HAL_I2S_CLEAR_OVRFLAG(__HANDLE__) do{__IO uint32_t tmpreg = (__HANDLE__)->Instance->DR;\
-                                               tmpreg = (__HANDLE__)->Instance->SR;}while(0)
+#define __HAL_I2S_CLEAR_OVRFLAG(__HANDLE__) do{ \
+                                               __IO uint32_t tmpreg; \
+                                               tmpreg = (__HANDLE__)->Instance->DR; \
+                                               tmpreg = (__HANDLE__)->Instance->SR; \
+                                               UNUSED(tmpreg); \
+                                              }while(0)
 /** @brief Clears the I2S UDR pending flag.
   * @param  __HANDLE__: specifies the I2S Handle.
   * @retval None
   */                                                                                                   
-#define __HAL_I2S_CLEAR_UDRFLAG(__HANDLE__)((__HANDLE__)->Instance->SR)    
+#define __HAL_I2S_CLEAR_UDRFLAG(__HANDLE__) do{\
+                                               __IO uint32_t tmpreg;\
+                                               tmpreg = ((__HANDLE__)->Instance->SR);\
+                                               UNUSED(tmpreg); \
+                                              }while(0) 
+/**
+  * @}
+  */ 
                                   
 /* Exported functions --------------------------------------------------------*/
-
+/** @addtogroup I2S_Exported_Functions
+  * @{
+  */
+                                                
+/** @addtogroup I2S_Exported_Functions_Group1
+  * @{
+  */
 /* Initialization/de-initialization functions  **********************************/
-__weak HAL_StatusTypeDef HAL_I2S_Init(I2S_HandleTypeDef *hi2s);
+HAL_StatusTypeDef HAL_I2S_Init(I2S_HandleTypeDef *hi2s);
 HAL_StatusTypeDef HAL_I2S_DeInit (I2S_HandleTypeDef *hi2s);
 void HAL_I2S_MspInit(I2S_HandleTypeDef *hi2s);
 void HAL_I2S_MspDeInit(I2S_HandleTypeDef *hi2s);
+/**
+  * @}
+  */
 
+/** @addtogroup I2S_Exported_Functions_Group2
+  * @{
+  */
 /* I/O operation functions  ***************************************************/
  /* Blocking mode: Polling */
 HAL_StatusTypeDef HAL_I2S_Transmit(I2S_HandleTypeDef *hi2s, uint16_t *pData, uint16_t Size, uint32_t Timeout);
@@ -388,29 +405,43 @@ HAL_StatusTypeDef HAL_I2S_DMAPause(I2S_HandleTypeDef *hi2s);
 HAL_StatusTypeDef HAL_I2S_DMAResume(I2S_HandleTypeDef *hi2s);
 HAL_StatusTypeDef HAL_I2S_DMAStop(I2S_HandleTypeDef *hi2s);
 
-/* Peripheral Control and State functions  **************************************/
-HAL_I2S_StateTypeDef HAL_I2S_GetState(I2S_HandleTypeDef *hi2s);
-HAL_I2S_ErrorTypeDef HAL_I2S_GetError(I2S_HandleTypeDef *hi2s);
-
 /* Callbacks used in non blocking modes (Interrupt and DMA) *******************/
 void HAL_I2S_TxHalfCpltCallback(I2S_HandleTypeDef *hi2s);
 void HAL_I2S_TxCpltCallback(I2S_HandleTypeDef *hi2s);
 void HAL_I2S_RxHalfCpltCallback(I2S_HandleTypeDef *hi2s);
 void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s);
 void HAL_I2S_ErrorCallback(I2S_HandleTypeDef *hi2s);
+/**
+  * @}
+  */
+
+/** @addtogroup I2S_Exported_Functions_Group3
+  * @{
+  */
+/* Peripheral Control and State functions  ************************************/
+HAL_I2S_StateTypeDef HAL_I2S_GetState(I2S_HandleTypeDef *hi2s);
+uint32_t HAL_I2S_GetError(I2S_HandleTypeDef *hi2s);
+/**
+  * @}
+  */
 
 /**
   * @}
   */ 
 
+
 /**
   * @}
   */
 
-#endif 	/* defined(STM32F031x6) || defined(STM32F038xx) || 												*/
-    		/* defined(STM32F051x8) || defined(STM32F058xx) || 												*/
-    		/* defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) ||*/
-    		/* defined(STM32F042x6) || defined(STM32F048xx)                           												*/
+/**
+  * @}
+  */
+#endif 	/* defined(STM32F031x6) || defined(STM32F038xx) || */
+        /* defined(STM32F051x8) || defined(STM32F058xx) || */
+        /* defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) ||*/
+        /* defined(STM32F042x6) || defined(STM32F048xx) || */
+        /* defined(STM32F091xC)	|| defined(STM32F098xx) */
 
 #ifdef __cplusplus
 }

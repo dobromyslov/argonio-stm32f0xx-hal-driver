@@ -2,13 +2,13 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_pcd_ex.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   Header file of PCD HAL Extension module.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -43,7 +43,7 @@
  extern "C" {
 #endif
 
-#if defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) || defined(STM32F078xx)
+#if defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) || defined(STM32F078xx)|| defined(STM32F070xB)|| defined(STM32F070x6)
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal_def.h"  
@@ -61,20 +61,33 @@
 /* Exported macros -----------------------------------------------------------*/
 /* Internal macros -----------------------------------------------------------*/
 /* Exported functions --------------------------------------------------------*/
+/** @addtogroup PCDEx_Exported_Functions PCDEx Exported Functions
+  * @{
+  */
+/** @addtogroup PCDEx_Exported_Functions_Group1 Peripheral Control functions
+  * @{
+  */   
 HAL_StatusTypeDef HAL_PCDEx_PMAConfig(PCD_HandleTypeDef *hpcd, 
                                      uint16_t ep_addr,
                                      uint16_t ep_kind,
                                      uint32_t pmaadress);
-
+/**
+  * @}
+  */ 
+  
 /**
   * @}
   */ 
 
 /**
   * @}
-  */ 
+  */
 
-#endif /* STM32F042x6 || STM32F072xB || STM32F078xx */
+/**
+  * @}
+  */   
+
+#endif /* STM32F042x6 || STM32F072xB || STM32F078xx || STM32F070xB || STM32F070x6*/
 
 #ifdef __cplusplus
 }
@@ -84,3 +97,4 @@ HAL_StatusTypeDef HAL_PCDEx_PMAConfig(PCD_HandleTypeDef *hpcd,
 #endif /* __STM32F0xx_HAL_PCD_EX_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

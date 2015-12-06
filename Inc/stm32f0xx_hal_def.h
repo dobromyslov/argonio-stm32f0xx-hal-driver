@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_def.h
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   This file contains HAL common defines, enumeration, macros and 
   *          structures definitions. 
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -46,6 +46,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx.h"
+#include "Legacy/stm32_hal_legacy.h"
+#include <stdio.h>
 
 /* Exported types ------------------------------------------------------------*/
 
@@ -70,9 +72,6 @@ typedef enum
 } HAL_LockTypeDef;
 
 /* Exported macro ------------------------------------------------------------*/
-#ifndef NULL
-  #define NULL      (void *) 0
-#endif
 
 #define HAL_MAX_DELAY      0xFFFFFFFF
 
@@ -85,6 +84,8 @@ typedef enum
                               (__DMA_HANDLE_).Parent = (__HANDLE__);               \
                           } while(0)
 
+#define UNUSED(x) ((void)(x))                            
+                            
 /** @brief Reset the Handle's State field.
   * @param __HANDLE__: specifies the Peripheral Handle.
   * @note  This macro can be used for the following purpose:
@@ -154,6 +155,23 @@ typedef enum
   #endif /* __ALIGN_BEGIN */
 #endif /* __GNUC__ */
 
+/** 
+  * @brief  __NOINLINE definition
+  */ 
+#if defined ( __CC_ARM   ) || defined   (  __GNUC__  )
+/* ARM & GNUCompiler 
+   ---------------- 
+*/
+#define __NOINLINE __attribute__ ( (noinline) )
+
+#elif defined ( __ICCARM__ )
+/* ICCARM Compiler
+   ---------------
+*/
+#define __NOINLINE _Pragma("optimize = no_inline")
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif
@@ -161,3 +179,4 @@ typedef enum
 #endif /* ___STM32F0xx_HAL_DEF */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

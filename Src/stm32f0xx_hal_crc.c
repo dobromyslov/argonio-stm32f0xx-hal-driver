@@ -2,12 +2,11 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_crc.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   CRC HAL module driver.
-  *    
   *          This file provides firmware functions to manage the following 
-  *          functionalities of the CRC peripheral:
+  *          functionalities of the Cyclic Redundancy Check (CRC) peripheral:
   *           + Initialization and de-initialization functions
   *           + Peripheral Control functions 
   *           + Peripheral State functions
@@ -17,16 +16,16 @@
             ##### How to use this driver #####
  ===============================================================================
     [..]
-         (+) Enable CRC AHB clock using __CRC_CLK_ENABLE();
-         (+) Initialize CRC calculator
-             - specify generating polynomial (IP default or non-default one)
-             - specify initialization value (IP default or non-default one)
-             - specify input data format
-             - specify input or output data inversion mode if any
-         (+) Use HAL_CRC_Accumulate() function to compute the CRC value of the 
+         (#) Enable CRC AHB clock using __HAL_RCC_CRC_CLK_ENABLE();
+         (#) Initialize CRC calculator
+             (++)specify generating polynomial (IP default or non-default one)
+             (++)specify initialization value (IP default or non-default one)
+             (++)specify input data format
+             (++)specify input or output data inversion mode if any
+         (#) Use HAL_CRC_Accumulate() function to compute the CRC value of the 
              input data buffer starting with the previously computed CRC as 
              initialization value
-         (+) Use HAL_CRC_Calculate() function to compute the CRC value of the 
+         (#) Use HAL_CRC_Calculate() function to compute the CRC value of the 
              input data buffer starting with the defined initialization value 
              (default or non-default) to initiate CRC calculation
 
@@ -34,7 +33,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -68,7 +67,7 @@
   * @{
   */
 
-/** @defgroup CRC 
+/** @defgroup CRC CRC 
   * @brief CRC HAL module driver.
   * @{
   */
@@ -80,19 +79,26 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-/* Private functions ---------------------------------------------------------*/
+/** @defgroup CRC_Private_Functions CRC Private Functions
+  * @{
+  */
 static uint32_t CRC_Handle_8(CRC_HandleTypeDef *hcrc, uint8_t pBuffer[], uint32_t BufferLength);
 static uint32_t CRC_Handle_16(CRC_HandleTypeDef *hcrc, uint16_t pBuffer[], uint32_t BufferLength);
-/** @defgroup CRC_Private_Functions
+/**
+  * @}
+  */
+  
+/* Exported functions ---------------------------------------------------------*/
+/** @defgroup CRC_Exported_Functions CRC Exported Functions
   * @{
   */
 
-/** @defgroup HAL_CRC_Group1 Initialization/de-initialization functions 
+/** @defgroup CRC_Exported_Functions_Group1 Initialization/de-initialization functions 
  *  @brief    Initialization and Configuration functions. 
  *
 @verbatim    
  ===============================================================================
-            ##### Initialization/de-initialization functions #####
+            ##### Initialization and Configuration functions #####
  ===============================================================================
     [..]  This section provides functions allowing to:
       (+) Initialize the CRC according to the specified parameters 
@@ -124,6 +130,8 @@ HAL_StatusTypeDef HAL_CRC_Init(CRC_HandleTypeDef *hcrc)
 
   if(hcrc->State == HAL_CRC_STATE_RESET)
   {   
+    /* Allocate lock resource and initialize it */
+    hcrc->Lock = HAL_UNLOCKED;
     /* Init the low level hardware */
     HAL_CRC_MspInit(hcrc);
   }
@@ -238,7 +246,7 @@ __weak void HAL_CRC_MspDeInit(CRC_HandleTypeDef *hcrc)
   * @}
   */
 
-/** @defgroup HAL_CRC_Group2 Peripheral Control functions 
+/** @defgroup CRC_Exported_Functions_Group2 Peripheral Control functions 
  *  @brief    management functions. 
  *
 @verbatim   
@@ -370,9 +378,46 @@ uint32_t HAL_CRC_Calculate(CRC_HandleTypeDef *hcrc, uint32_t pBuffer[], uint32_t
   /* Return the CRC computed value */ 
   return temp;
 }
+/**
+  * @}
+  */
 
+/** @defgroup CRC_Exported_Functions_Group3 Peripheral State functions 
+ *  @brief    Peripheral State functions. 
+ *
+@verbatim   
+ ===============================================================================
+                      ##### Peripheral State functions #####
+ ===============================================================================  
+    [..]
+    This subsection permits to get in run-time the status of the peripheral 
+    and the data flow.
 
+@endverbatim
+  * @{
+  */
 
+/**
+  * @brief  Returns the CRC state.
+  * @param  hcrc: CRC handle
+  * @retval HAL state
+  */
+HAL_CRC_StateTypeDef HAL_CRC_GetState(CRC_HandleTypeDef *hcrc)
+{
+  return hcrc->State;
+}
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/** @addtogroup CRC_Private_Functions CRC Private Functions
+  * @{
+  */
 /**             
   * @brief  Enter 8-bit input data to the CRC calculator.
   *         Specific data handling to optimize processing time.  
@@ -443,36 +488,6 @@ static uint32_t CRC_Handle_16(CRC_HandleTypeDef *hcrc, uint16_t pBuffer[], uint3
   /* Return the CRC computed value */ 
   return hcrc->Instance->DR;
 }
-
-/**
-  * @}
-  */
-
-/** @defgroup HAL_CRC_Group3 Peripheral State functions 
- *  @brief    Peripheral State functions. 
- *
-@verbatim   
- ===============================================================================
-                      ##### Peripheral State functions #####
- ===============================================================================  
-    [..]
-    This subsection permits to get in run-time the status of the peripheral 
-    and the data flow.
-
-@endverbatim
-  * @{
-  */
-
-/**
-  * @brief  Returns the CRC state.
-  * @param  hcrc: CRC handle
-  * @retval HAL state
-  */
-HAL_CRC_StateTypeDef HAL_CRC_GetState(CRC_HandleTypeDef *hcrc)
-{
-  return hcrc->State;
-}
-
 /**
   * @}
   */

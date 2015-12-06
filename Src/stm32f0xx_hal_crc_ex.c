@@ -2,19 +2,17 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_crc_ex.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   Extended CRC HAL module driver.
-  *    
   *          This file provides firmware functions to manage the following 
   *          functionalities of the CRC peripheral:
   *           + Extended initialization functions
   *         
   @verbatim
 ================================================================================
-          ##### <Product specific features/integration> #####
+          ##### Product specific features  #####
 ================================================================================
-                 
    
             ##### How to use this driver #####
 ================================================================================
@@ -27,7 +25,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -61,7 +59,7 @@
   * @{
   */
 
-/** @defgroup CRCEx
+/** @defgroup CRCEx CRCEx 
   * @brief CRC Extended HAL module driver
   * @{
   */
@@ -75,16 +73,16 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-/** @defgroup CRCEx_Private_Functions
+/** @defgroup CRCEx_Exported_Functions CRCEx Exported Functions
   * @{
   */
 
-/** @defgroup CRCEx_Group1 Extended Initialization/de-initialization functions
+/** @defgroup CRCEx_Exported_Functions_Group1 Extended Initialization/de-initialization functions
   * @brief    Extended Initialization and Configuration functions.
   *
 @verbatim    
  ===============================================================================
-            ##### Initialization/de-initialization function #####
+            ##### Initialization and Configuration functions #####
  ===============================================================================
     [..]  This section provides functions allowing to:
       (+) Initialize the CRC generating polynomial: if programmable polynomial 
@@ -106,7 +104,7 @@
   */             
 HAL_StatusTypeDef HAL_CRCEx_Init(CRC_HandleTypeDef *hcrc)
 {
-#if defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx)    
+#if defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || defined(STM32F091xC) || defined (STM32F098xx)
   /* check whether or not non-default generating polynomial has been 
    * picked up by user */
   assert_param(IS_DEFAULT_POLYNOMIAL(hcrc->Init.DefaultPolynomialUse)); 
@@ -124,7 +122,7 @@ HAL_StatusTypeDef HAL_CRCEx_Init(CRC_HandleTypeDef *hcrc)
       return HAL_ERROR;
     }
   }
-#endif /* defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) */    
+#endif /* defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || defined(STM32F091xC) || defined (STM32F098xx) */    
 
    return HAL_OK;
 }
@@ -162,8 +160,8 @@ HAL_StatusTypeDef HAL_CRCEx_Input_Data_Reverse(CRC_HandleTypeDef *hcrc, uint32_t
   * @param  hcrc: CRC handle
   * @param  OutputReverseMode: Output Data inversion mode
   *         This parameter can be one of the following values:
-  *          @arg CRC_OUTPUTDATA_INVERSION_DISABLED: no CRC inversion (default value)
-  *          @arg CRC_OUTPUTDATA_INVERSION_ENABLED: bit-level inversion (e.g for a 8-bit CRC: 0xB5 becomes 0xAD)            
+  *          @arg CRC_OUTPUTDATA_INVERSION_DISABLE: no CRC inversion (default value)
+  *          @arg CRC_OUTPUTDATA_INVERSION_ENABLE: bit-level inversion (e.g for a 8-bit CRC: 0xB5 becomes 0xAD)            
   * @retval HAL status
   */                                   
 HAL_StatusTypeDef HAL_CRCEx_Output_Data_Reverse(CRC_HandleTypeDef *hcrc, uint32_t OutputReverseMode)
@@ -184,7 +182,7 @@ HAL_StatusTypeDef HAL_CRCEx_Output_Data_Reverse(CRC_HandleTypeDef *hcrc, uint32_
   return HAL_OK;
 }
 
-#if defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx)
+#if defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || defined (STM32F091xC) || defined (STM32F098xx)
 /**
   * @brief  Initializes the CRC polynomial if different from default one.
   * @param  hcrc: CRC handle
@@ -214,7 +212,8 @@ HAL_StatusTypeDef HAL_CRCEx_Polynomial_Set(CRC_HandleTypeDef *hcrc, uint32_t Pol
    * Look for MSB position: msb will contain the degree of
    *  the second to the largest polynomial member. E.g., for
    *  X^7 + X^6 + X^5 + X^2 + 1, msb = 6. */
-  while (((Pol & (1U << msb)) == 0) && (msb-- > 0));
+  while (((Pol & (1U << msb)) == 0) && (msb-- > 0))
+  {}
 
   switch (PolyLength)
   {
@@ -252,7 +251,7 @@ HAL_StatusTypeDef HAL_CRCEx_Polynomial_Set(CRC_HandleTypeDef *hcrc, uint32_t Pol
   /* Return function status */
   return HAL_OK;
 }
-#endif /* #if defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) */
+#endif /* #if defined (STM32F071xB) || defined (STM32F072xB) || defined (STM32F078xx) || defined (STM32F091xC) || defined (STM32F098xx) */
 
 /**
   * @}

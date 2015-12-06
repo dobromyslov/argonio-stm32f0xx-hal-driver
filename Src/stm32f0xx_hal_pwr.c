@@ -2,10 +2,9 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_pwr.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   PWR HAL module driver.
-  *
   *          This file provides firmware functions to manage the following
   *          functionalities of the Power Controller (PWR) peripheral:
   *           + Initialization/de-initialization function
@@ -15,7 +14,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -49,7 +48,7 @@
   * @{
   */
 
-/** @defgroup PWR
+/** @defgroup PWR PWR
   * @brief PWR HAL module driver
   * @{
   */
@@ -63,11 +62,11 @@
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
-/** @defgroup PWR_Private_Functions
+/** @defgroup PWR_Exported_Functions PWR Exported Functions
   * @{
   */
 
-/** @defgroup HAL_PWR_Group1 Initialization and de-initialization functions 
+/** @defgroup PWR_Exported_Functions_Group1 Initialization and de-initialization functions 
   *  @brief    Initialization and de-initialization functions
   *
 @verbatim
@@ -80,7 +79,7 @@
       write accesses.
       To enable access to the RTC Domain and RTC registers, proceed as follows:
         (+) Enable the Power Controller (PWR) APB1 interface clock using the
-            __PWR_CLK_ENABLE() macro.
+            __HAL_RCC_PWR_CLK_ENABLE() macro.
         (+) Enable access to RTC domain using the HAL_PWR_EnableBkUpAccess() function.
 
 @endverbatim
@@ -88,22 +87,20 @@
   */
 
 /**
-  * @brief Deinitializes the HAL PWR peripheral registers to their default reset values.
-  * @param None
+  * @brief Deinitializes the PWR peripheral registers to their default reset values.
   * @retval None
   */
 void HAL_PWR_DeInit(void)
 {
-  __PWR_FORCE_RESET();
-  __PWR_RELEASE_RESET();
+  __HAL_RCC_PWR_FORCE_RESET();
+  __HAL_RCC_PWR_RELEASE_RESET();
 }
 
 /**
   * @brief Enables access to the backup domain (RTC registers, RTC
-  *         backup data registers).
+  *         backup data registers when present).
   * @note  If the HSE divided by 32 is used as the RTC clock, the
   *         Backup Domain Access should be kept enabled.
-  * @param None
   * @retval None
   */
 void HAL_PWR_EnableBkUpAccess(void)
@@ -113,10 +110,9 @@ void HAL_PWR_EnableBkUpAccess(void)
 
 /**
   * @brief Disables access to the backup domain (RTC registers, RTC
-  *         backup data registers).
+  *         backup data registers when present).
   * @note  If the HSE divided by 32 is used as the RTC clock, the
   *         Backup Domain Access should be kept enabled.
-  * @param None
   * @retval None
   */
 void HAL_PWR_DisableBkUpAccess(void)
@@ -128,13 +124,13 @@ void HAL_PWR_DisableBkUpAccess(void)
   * @}
   */
 
-/** @defgroup HAL_PWR_Group2 Peripheral Control function
+/** @defgroup PWR_Exported_Functions_Group2 Peripheral Control functions 
   *  @brief Low Power modes configuration functions
   *
 @verbatim
 
  ===============================================================================
-                 ##### Peripheral Control function #####
+                 ##### Peripheral Control functions #####
  ===============================================================================
     
     *** WakeUp pin configuration ***
@@ -142,15 +138,15 @@ void HAL_PWR_DisableBkUpAccess(void)
     [..]
       (+) WakeUp pin is used to wakeup the system from Standby mode. This pin is
           forced in input pull down configuration and is active on rising edges.
-      (+) There are two WakeUp pins, and up to eight Wakeup pins on STM32F07x devices.
-          WakeUp Pin 1 on PA.00.
-          WakeUp Pin 2 on PC.13.
-          WakeUp Pin 3 on PE.06.(STM32F07x)
-          WakeUp Pin 4 on PA.02.(STM32F07x)
-          WakeUp Pin 5 on PC.05.(STM32F07x)
-          WakeUp Pin 6 on PB.05.(STM32F07x)
-          WakeUp Pin 7 on PB.15.(STM32F07x)
-          WakeUp Pin 8 on PF.02.(STM32F07x)
+      (+) There are two WakeUp pins, and up to eight Wakeup pins on STM32F07x & STM32F09x devices.
+         (++)WakeUp Pin 1 on PA.00.
+         (++)WakeUp Pin 2 on PC.13.
+         (++)WakeUp Pin 3 on PE.06.(STM32F07x/STM32F09x)
+         (++)WakeUp Pin 4 on PA.02.(STM32F07x/STM32F09x)
+         (++)WakeUp Pin 5 on PC.05.(STM32F07x/STM32F09x)
+         (++)WakeUp Pin 6 on PB.05.(STM32F07x/STM32F09x)
+         (++)WakeUp Pin 7 on PB.15.(STM32F07x/STM32F09x)
+         (++)WakeUp Pin 8 on PF.02.(STM32F07x/STM32F09x)
 
     *** Low Power modes configuration ***
     =====================================
@@ -204,8 +200,7 @@ void HAL_PWR_DisableBkUpAccess(void)
       on the Cortex-M0 deep sleep mode, with the voltage regulator disabled.
       The 1.8V domain is consequently powered off. The PLL, the HSI oscillator and
       the HSE oscillator are also switched off. SRAM and register contents are lost
-      except for the RTC registers, RTC backup registers and Standby
-      circuitry.
+      except for the RTC registers, RTC backup registers and Standby circuitry.
       The voltage regulator is OFF.
 
       (+) Entry:
@@ -276,9 +271,9 @@ void HAL_PWR_DisableWakeUpPin(uint32_t WakeUpPinx)
   * @brief Enters Sleep mode.
   * @note  In Sleep mode, all I/O pins keep the same state as in Run mode.
   * @param Regulator: Specifies the regulator state in SLEEP mode.
-  *          This parameter can be one of the following values:
-  *            @arg PWR_MAINREGULATOR_ON: SLEEP mode with regulator ON
-  *            @arg PWR_LOWPOWERREGULATOR_ON: SLEEP mode with low power regulator ON
+  *           On STM32F0 devices, this parameter is a dummy value and it is ignored
+  *           as regulator can't be modified in this mode. Parameter is kept for platform
+  *           compatibility.
   * @param SLEEPEntry: Specifies if SLEEP mode is entered with WFI or WFE instruction.
   *           When WFI entry is used, tick interrupt have to be disabled if not desired as 
   *           the interrupt wake up source.
@@ -289,23 +284,9 @@ void HAL_PWR_DisableWakeUpPin(uint32_t WakeUpPinx)
   */
 void HAL_PWR_EnterSLEEPMode(uint32_t Regulator, uint8_t SLEEPEntry)
 {
-   uint32_t tmpreg = 0;
-
   /* Check the parameters */
   assert_param(IS_PWR_REGULATOR(Regulator));
   assert_param(IS_PWR_SLEEP_ENTRY(SLEEPEntry));
-
-  /* Select the regulator state in SLEEP mode ---------------------------------*/
-  tmpreg = PWR->CR;
-
-  /* Clear PDDS and LPDS bits */
-  tmpreg &= (uint32_t)~(PWR_CR_PDDS | PWR_CR_LPDS);
-
-  /* Set LPDS bit according to Regulator value */
-  tmpreg |= Regulator;
-
-  /* Store the new value */
-  PWR->CR = tmpreg;
 
   /* Clear SLEEPDEEP bit of Cortex System Control Register */
   SCB->SCR &= (uint32_t)~((uint32_t)SCB_SCR_SLEEPDEEP_Msk);
@@ -323,7 +304,6 @@ void HAL_PWR_EnterSLEEPMode(uint32_t Regulator, uint8_t SLEEPEntry)
     __WFE();
     __WFE();
   }
-
 }
 
 /**
@@ -398,7 +378,6 @@ void HAL_PWR_EnterSTOPMode(uint32_t Regulator, uint8_t STOPEntry)
   *            mode and voltage regulator in Run mode because the regulator 
   *            not used and the core is supplied directly from an external source.
   *            Consequently, the Standby mode is not available on those devices.
-  * @param  None
   * @retval None
   */
 void HAL_PWR_EnterSTANDBYMode(void)
@@ -415,6 +394,60 @@ void HAL_PWR_EnterSTANDBYMode(void)
 #endif
   /* Request Wait For Interrupt */
   __WFI();
+}
+
+/**
+  * @brief Indicates Sleep-On-Exit when returning from Handler mode to Thread mode. 
+  * @note Set SLEEPONEXIT bit of SCR register. When this bit is set, the processor 
+  *       re-enters SLEEP mode when an interruption handling is over.
+  *       Setting this bit is useful when the processor is expected to run only on
+  *       interruptions handling.         
+  * @retval None
+  */
+void HAL_PWR_EnableSleepOnExit(void)
+{
+  /* Set SLEEPONEXIT bit of Cortex System Control Register */
+  SET_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SLEEPONEXIT_Msk));
+}
+
+
+/**
+  * @brief Disables Sleep-On-Exit feature when returning from Handler mode to Thread mode. 
+  * @note Clears SLEEPONEXIT bit of SCR register. When this bit is set, the processor 
+  *       re-enters SLEEP mode when an interruption handling is over.          
+  * @retval None
+  */
+void HAL_PWR_DisableSleepOnExit(void)
+{
+  /* Clear SLEEPONEXIT bit of Cortex System Control Register */
+  CLEAR_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SLEEPONEXIT_Msk));
+}
+
+
+
+/**
+  * @brief Enables CORTEX M4 SEVONPEND bit. 
+  * @note Sets SEVONPEND bit of SCR register. When this bit is set, this causes 
+  *       WFE to wake up when an interrupt moves from inactive to pended.
+  * @retval None
+  */
+void HAL_PWR_EnableSEVOnPend(void)
+{
+  /* Set SEVONPEND bit of Cortex System Control Register */
+  SET_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SEVONPEND_Msk));
+}
+
+
+/**
+  * @brief Disables CORTEX M4 SEVONPEND bit. 
+  * @note Clears SEVONPEND bit of SCR register. When this bit is set, this causes 
+  *       WFE to wake up when an interrupt moves from inactive to pended.         
+  * @retval None
+  */
+void HAL_PWR_DisableSEVOnPend(void)
+{
+  /* Clear SEVONPEND bit of Cortex System Control Register */
+  CLEAR_BIT(SCB->SCR, ((uint32_t)SCB_SCR_SEVONPEND_Msk));
 }
 
 /**

@@ -2,8 +2,8 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_tsc.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   This file provides firmware functions to manage the following 
   *          functionalities of the Touch Sensing Controller (TSC) peripheral:
   *           + Initialization and DeInitialization
@@ -47,10 +47,10 @@
                           ##### How to use this driver #####
 ================================================================================
   [..]
-    (#) Enable the TSC interface clock using __TSC_CLK_ENABLE() macro.
+    (#) Enable the TSC interface clock using __HAL_RCC_TSC_CLK_ENABLE() macro.
 
     (#) GPIO pins configuration
-      (++) Enable the clock for the TSC GPIOs using __GPIOx_CLK_ENABLE() macro.
+      (++) Enable the clock for the TSC GPIOs using __HAL_RCC_GPIOx_CLK_ENABLE() macro.
       (++) Configure the TSC pins used as sampling IOs in alternate function output Open-Drain mode,
            and TSC pins used as channel/shield IOs in alternate function output Push-Pull mode
            using HAL_GPIO_Init() function.
@@ -81,7 +81,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -111,20 +111,20 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
+#ifdef HAL_TSC_MODULE_ENABLED
+
+#if defined(STM32F051x8) || defined(STM32F071xB) || defined(STM32F091xC) || \
+    defined(STM32F042x6) || defined(STM32F072xB) ||                         \
+    defined(STM32F048xx) || defined(STM32F058xx) || defined(STM32F078xx) || defined(STM32F098xx)
+
 /** @addtogroup STM32F0xx_HAL_Driver
   * @{
   */
 
-/** @defgroup TSC
-  * @brief HAL TSC module driver
+/** @defgroup TSC TSC
+  * @brief TSC HAL module driver
   * @{
   */
-
-#ifdef HAL_TSC_MODULE_ENABLED
-
-#if defined(STM32F051x8) || defined(STM32F071xB) || \
-    defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) || \
-    defined(STM32F058xx) || defined(STM32F078xx)
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -132,13 +132,13 @@
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
 static uint32_t TSC_extract_groups(uint32_t iomask);
-/* Private functions ---------------------------------------------------------*/
+/* Exported functions ---------------------------------------------------------*/
 
-/** @defgroup TSC_Private_Functions
+/** @defgroup TSC_Exported_Functions TSC Exported Functions
   * @{
   */ 
 
-/** @defgroup TSC_Group1 Initialization/de-initialization functions 
+/** @defgroup TSC_Exported_Functions_Group1 Initialization/de-initialization functions 
  *  @brief    Initialization and Configuration functions 
  *
 @verbatim    
@@ -179,7 +179,13 @@ HAL_StatusTypeDef HAL_TSC_Init(TSC_HandleTypeDef* htsc)
   assert_param(IS_TSC_SYNC_POL(htsc->Init.SynchroPinPolarity));
   assert_param(IS_TSC_ACQ_MODE(htsc->Init.AcquisitionMode));
   assert_param(IS_TSC_MCE_IT(htsc->Init.MaxCountInterrupt));
-    
+
+  if(htsc->State == HAL_TSC_STATE_RESET)
+  {
+    /* Allocate lock resource and initialize it */
+    htsc->Lock = HAL_UNLOCKED;
+  }    
+
   /* Initialize the TSC state */
   htsc->State = HAL_TSC_STATE_BUSY;
 
@@ -298,12 +304,12 @@ __weak void HAL_TSC_MspDeInit(TSC_HandleTypeDef* htsc)
   * @}
   */
 
-/** @defgroup HAL_TSC_Group2 IO operation functions
+/** @defgroup TSC_Exported_Functions_Group2 IO operation functions
  *  @brief    IO operation functions 
  *
 @verbatim   
  ===============================================================================
-             ##### I/O Operation functions #####
+             ##### IO operation functions #####
  ===============================================================================  
     [..]  This section provides functions allowing to:
       (+) Start acquisition in polling mode.
@@ -500,7 +506,7 @@ uint32_t HAL_TSC_GroupGetValue(TSC_HandleTypeDef* htsc, uint32_t gx_index)
   * @}
   */
   
-/** @defgroup HAL_TSC_Group3 Peripheral Control functions
+/** @defgroup TSC_Exported_Functions_Group3 Peripheral Control functions
  *  @brief    Peripheral Control functions 
  *
 @verbatim   
@@ -586,7 +592,7 @@ HAL_StatusTypeDef HAL_TSC_IODischarge(TSC_HandleTypeDef* htsc, uint32_t choice)
   * @}
   */
 
-/** @defgroup HAL_TSC_Group4 State functions
+/** @defgroup TSC_Exported_Functions_Group4 State functions
  *  @brief   State functions 
  *
 @verbatim   
@@ -706,6 +712,11 @@ void HAL_TSC_IRQHandler(TSC_HandleTypeDef* htsc)
   * @}
   */
 
+/** @defgroup TSC_Exported_Functions_Group5 Callback functions
+ *  @brief   Callback functions 
+ *  @{
+ */
+ 
 /**
   * @brief  Acquisition completed callback in non blocking mode 
   * @param  htsc: pointer to a TSC_HandleTypeDef structure that contains
@@ -733,6 +744,18 @@ __weak void HAL_TSC_ErrorCallback(TSC_HandleTypeDef* htsc)
 }
 
 /**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
+/** @defgroup TSC_Private_Functions TSC Private Functions
+ *  @{
+ */
+      
+/**
   * @brief  Utility function used to set the acquired groups mask
   * @param  iomask: Channels IOs mask
   * @retval Acquired groups mask
@@ -757,18 +780,18 @@ static uint32_t TSC_extract_groups(uint32_t iomask)
   * @}
   */
 
-#endif /* defined(STM32F051x8) || defined(STM32F071xB) || */
-       /* defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) || */
-       /* defined(STM32F058xx) || defined(STM32F078xx)    */
+/**
+  * @}
+  */ 
+
+/**
+  * @}
+  */ 
+
+#endif /* defined(STM32F051x8) || defined(STM32F071xB) || defined(STM32F091xC) || */
+       /* defined(STM32F042x6) || defined(STM32F072xB) ||                         */
+       /* defined(STM32F048xx) || defined(STM32F058xx) || defined(STM32F078xx) || defined(STM32F098xx) */
 
 #endif /* HAL_TSC_MODULE_ENABLED */
-
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

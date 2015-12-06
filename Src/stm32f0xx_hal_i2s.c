@@ -2,10 +2,9 @@
   ******************************************************************************
   * @file    stm32f0xx_hal_i2s.c
   * @author  MCD Application Team
-  * @version V1.0.1
-  * @date    18-June-2014
+  * @version V1.3.0
+  * @date    26-June-2015
   * @brief   I2S HAL module driver.
-  *
   *          This file provides firmware functions to manage the following 
   *          functionalities of the Integrated Interchip Sound (I2S) peripheral:
   *           + Initialization and de-initialization functions
@@ -94,7 +93,7 @@
    *** I2S HAL driver macros list ***
    =============================================
    [..]
-     Below the list of most used macros in USART HAL driver.
+     Below the list of most used macros in I2S HAL driver.
        
       (+) __HAL_I2S_ENABLE: Enable the specified SPI peripheral (in I2S mode) 
       (+) __HAL_I2S_DISABLE: Disable the specified SPI peripheral (in I2S mode)
@@ -109,7 +108,7 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -139,27 +138,31 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 
-/** @addtogroup STM32F0xx_HAL_Driver
-  * @{
-  */
-
-/** @defgroup I2S 
-  * @brief I2S HAL module driver
-  * @{
-  */
-
 #ifdef HAL_I2S_MODULE_ENABLED
 
 #if defined(STM32F031x6) || defined(STM32F038xx) || \
     defined(STM32F051x8) || defined(STM32F058xx) || \
     defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || \
-    defined(STM32F042x6) || defined(STM32F048xx)
+    defined(STM32F042x6) || defined(STM32F048xx) || \
+    defined(STM32F091xC) || defined(STM32F098xx)
+
+/** @addtogroup STM32F0xx_HAL_Driver
+  * @{
+  */
+
+/** @defgroup I2S I2S
+  * @brief I2S HAL module driver
+  * @{
+  */
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
+/** @defgroup I2S_Private_Functions I2S Private Functions
+  * @{
+  */
 static void               I2S_DMATxCplt(DMA_HandleTypeDef *hdma);
 static void               I2S_DMATxHalfCplt(DMA_HandleTypeDef *hdma); 
 static void               I2S_DMARxCplt(DMA_HandleTypeDef *hdma);
@@ -168,14 +171,17 @@ static void               I2S_DMAError(DMA_HandleTypeDef *hdma);
 static void               I2S_Transmit_IT(I2S_HandleTypeDef *hi2s);
 static void               I2S_Receive_IT(I2S_HandleTypeDef *hi2s);
 static HAL_StatusTypeDef  I2S_WaitFlagStateUntilTimeout(I2S_HandleTypeDef *hi2s, uint32_t Flag, uint32_t State, uint32_t Timeout);
+/**
+  * @}
+  */
 
-/* Private functions ---------------------------------------------------------*/
+/* Exported functions ---------------------------------------------------------*/
 
-/** @defgroup I2S_Private_Functions
+/** @defgroup I2S_Exported_Functions I2S Exported Functions
   * @{
   */
 
-/** @defgroup  I2S_Group1 Initialization and de-initialization functions 
+/** @defgroup  I2S_Exported_Functions_Group1 Initialization and de-initialization functions 
   *  @brief    Initialization and Configuration functions 
   *
 @verbatim    
@@ -228,11 +234,13 @@ HAL_StatusTypeDef HAL_I2S_Init(I2S_HandleTypeDef *hi2s)
   assert_param(IS_I2S_DATA_FORMAT(hi2s->Init.DataFormat));
   assert_param(IS_I2S_MCLK_OUTPUT(hi2s->Init.MCLKOutput));
   assert_param(IS_I2S_AUDIO_FREQ(hi2s->Init.AudioFreq));
-  assert_param(IS_I2S_CPOL(hi2s->Init.CPOL));  
-  assert_param(IS_I2S_CLOCKSOURCE(hi2s->Init.ClockSource));
+  assert_param(IS_I2S_CPOL(hi2s->Init.CPOL));
   
   if(hi2s->State == HAL_I2S_STATE_RESET)
   {
+    /* Allocate lock resource and initialize it */
+    hi2s->Lock = HAL_UNLOCKED;
+    
     /* Init the low level hardware : GPIO, CLOCK, CORTEX...etc */
     HAL_I2S_MspInit(hi2s);
   }
@@ -385,7 +393,7 @@ HAL_StatusTypeDef HAL_I2S_DeInit(I2S_HandleTypeDef *hi2s)
   * @}
   */
 
-/** @defgroup I2S_Group2 IO operation functions 
+/** @defgroup I2S_Exported_Functions_Group2 IO operation functions 
   *  @brief Data transfers functions 
   *
 @verbatim   
@@ -977,18 +985,18 @@ HAL_StatusTypeDef HAL_I2S_DMAStop(I2S_HandleTypeDef *hi2s)
   hi2s->Instance->CR2 &= (uint16_t)(~SPI_CR2_TXDMAEN);
   hi2s->Instance->CR2 &= (uint16_t)(~SPI_CR2_RXDMAEN);
   
-  /* Disable the I2S DMA channel */
-  __HAL_DMA_DISABLE(hi2s->hdmatx);
-  __HAL_DMA_DISABLE(hi2s->hdmarx);
-  
   /* Abort the I2S DMA tx channel */
   if(hi2s->hdmatx != NULL)
   {
+    /* Disable the I2S DMA channel */
+    __HAL_DMA_DISABLE(hi2s->hdmatx);
     HAL_DMA_Abort(hi2s->hdmatx);
   }
   /* Abort the I2S DMA rx channel */
   if(hi2s->hdmarx != NULL)
   {
+    /* Disable the I2S DMA channel */
+    __HAL_DMA_DISABLE(hi2s->hdmarx);
     HAL_DMA_Abort(hi2s->hdmarx);
   }
 
@@ -1126,7 +1134,7 @@ __weak void HAL_I2S_RxCpltCallback(I2S_HandleTypeDef *hi2s)
   * @}
   */
 
-/** @defgroup I2S_Group3 Peripheral State and Errors functions 
+/** @defgroup I2S_Exported_Functions_Group3 Peripheral State and Errors functions 
   *  @brief   Peripheral State functions 
   *
 @verbatim   
@@ -1158,15 +1166,21 @@ HAL_I2S_StateTypeDef HAL_I2S_GetState(I2S_HandleTypeDef *hi2s)
   *         the configuration information for I2S module
   * @retval I2S Error Code
   */
-HAL_I2S_ErrorTypeDef HAL_I2S_GetError(I2S_HandleTypeDef *hi2s)
+uint32_t HAL_I2S_GetError(I2S_HandleTypeDef *hi2s)
 {
   return hi2s->ErrorCode;
 }
+/**
+  * @}
+  */
 
 /**
   * @}
   */
 
+/** @addtogroup I2S_Private_Functions I2S Private Functions
+  * @{
+  */
 /**
   * @brief DMA I2S transmit process complete callback 
   * @param  hdma: pointer to a DMA_HandleTypeDef structure that contains
@@ -1359,18 +1373,20 @@ static HAL_StatusTypeDef I2S_WaitFlagStateUntilTimeout(I2S_HandleTypeDef *hi2s, 
   * @}
   */
 
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */
+
 #endif /* defined(STM32F031x6) || defined(STM32F038xx) || */
        /* defined(STM32F051x8) || defined(STM32F058xx) || */
        /* defined(STM32F071xB) || defined(STM32F072xB) || defined(STM32F078xx) || */
-       /* defined(STM32F042x6) || defined(STM32F048xx) */
+       /* defined(STM32F042x6) || defined(STM32F048xx) || */
+       /* defined(STM32F091xC) || defined(STM32F098xx) */
 
 #endif /* HAL_I2S_MODULE_ENABLED */
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
