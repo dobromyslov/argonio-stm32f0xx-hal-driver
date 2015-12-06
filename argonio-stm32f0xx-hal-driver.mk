@@ -33,6 +33,7 @@ CSRC += $(HAL)/Src/stm32f0xx_hal.c \
          $(HAL)/Src/stm32f0xx_hal_smartcard_ex.c \
          $(HAL)/Src/stm32f0xx_hal_smbus.c \
          $(HAL)/Src/stm32f0xx_hal_spi.c \
+         $(HAL)/Src/stm32f0xx_hal_spi_ex.c \
          $(HAL)/Src/stm32f0xx_hal_tim.c \
          $(HAL)/Src/stm32f0xx_hal_tim_ex.c \
          $(HAL)/Src/stm32f0xx_hal_tsc.c \
